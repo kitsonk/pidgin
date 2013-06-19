@@ -11,3 +11,5 @@ The main design goals of this prototype are:
 * Leverage AMD
 * Fit well into Dojo 2
 
+[Polymer/platform]: https://github.com/Polymer/platform
+[dcl]: http://www.dcljs.org/
