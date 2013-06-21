@@ -1,7 +1,6 @@
 define([
 	'exports',
 	'./registry',
-	'./Destroyable',
 	'./lib/core/aspect',
 	'./lib/core/compose',
 	'./lib/core/dom',
@@ -9,7 +8,7 @@ define([
 	'./lib/core/on',
 	'./lib/core/properties',
 	'./lib/core/when'
-], function (exports, registry, Destoryable, aspect, compose, dom, lang, on, properties, when) {
+], function (exports, registry, aspect, compose, dom, lang, on, properties, when) {
 	'use strict';
 
 	/**
@@ -34,7 +33,7 @@ define([
 	 * @param  {DOMNode|String} [sourceNode] The node that should be used to build the widget on top of
 	 * @return {pidgin/Widget}               The instance
 	 */
-	var Widget = compose(Destoryable, function (properties, sourceNode) {
+	var Widget = compose(function (properties, sourceNode) {
 		this.create(properties, sourceNode);
 	}, {
 		/**
@@ -206,6 +205,32 @@ define([
 			var args = [ this.node ];
 			args.push.apply(args, arguments);
 			return on.emit.apply(on, args);
+		},
+
+		/**
+		 * Take ownership of a handle that will then be removed when the widget is destroyed
+		 * @param {Object...} handle Any number of handles to take ownership of
+		 */
+		own: function () {
+			var i,
+				handle,
+				destroyMethodName,
+				odh,
+				hdh;
+
+			for (i = 0; i < arguments.length; i++) {
+				handle = arguments[i];
+				destroyMethodName = 'destroy' in handle ? 'destroy' : 'remove';
+				odh = aspect.before(this, 'destroy', function (preserveDom) {
+					handle[destroyMethodName](preserveDom);
+				});
+				hdh = aspect.after(handle, destroyMethodName, function () {
+					odh.remove();
+					hdh.remove();
+				}, true);
+			}
+
+			return arguments;
 		},
 
 		/**
