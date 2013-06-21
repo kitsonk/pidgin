@@ -52,12 +52,6 @@ define([
 		id: '',
 
 		/**
-		 * The base class for the widget, used to generate state class names on the widget node
-		 * @type {String}
-		 */
-		baseClass: '',
-
-		/**
 		 * The root node for the widget
 		 * @type {DOMNode}
 		 */
@@ -191,9 +185,9 @@ define([
 		 * @return {Object}			   A handle object that contains a `.remove()` method to remove the listener
 		 */
 		on: function (type, listener) {
-			return on.parse(this.node, type, listener, function (target, type) {
+			return this.own(on.parse(this.node, type, listener, function (target, type) {
 				return aspect.after(target, 'on' + type, listener, true);
-			});
+			}));
 		},
 
 		/**
