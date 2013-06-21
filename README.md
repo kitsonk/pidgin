@@ -1,9 +1,8 @@
 # pidgin #
 
-**pidgin** is a prototype widget based system for Dojo 2.  It leverages two key technologies:
+**pidgin** is a prototype widget based system for Dojo 2.  It another key technology:
 
 * [Polymer/platform][] - A polyfill of next generation browser technologies
-* [dcl][] - A minimalistic implementation of OOP for ECMAScript
 
 The main design goals of this prototype are:
 
@@ -12,4 +11,3 @@ The main design goals of this prototype are:
 * Fit well into Dojo 2
 
 [Polymer/platform]: https://github.com/Polymer/platform
-[dcl]: http://www.dcljs.org/
