@@ -1,3 +1,0 @@
-define([
-	'./Widget'
-], 1);

@@ -31,7 +31,7 @@ define({
 		]
 	},
 
-	suites: [ 'pidgin/tests/all' ],
+	suites: [ 'pidgin/tests/unit' ],
 
 	functionalSuites: [],
 

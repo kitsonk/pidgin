@@ -1,6 +1,7 @@
 define([
 	'exports',
 	'./registry',
+	'./util',
 	'./lib/core/aspect',
 	'./lib/core/compose',
 	'./lib/core/dom',
@@ -8,7 +9,7 @@ define([
 	'./lib/core/on',
 	'./lib/core/properties',
 	'./lib/core/when'
-], function (exports, registry, aspect, compose, dom, lang, on, properties, when) {
+], function (exports, registry, util, aspect, compose, dom, lang, on, properties, when) {
 	'use strict';
 
 	/**
@@ -19,6 +20,9 @@ define([
 
 		// Creates a property in the compose prototype that is based off an EF5 descriptor
 	var property = compose.property,
+
+		// Creates property descriptors that "mirrors" DOM attributes
+		getShadowDomAttributeDescriptor = util.getShadowDomAttributeDescriptor,
 
 		// Creates a "shadow" property on the target, which is a non-enumerable value that has '_' appended to the
 		// front of it
@@ -40,16 +44,13 @@ define([
 		 * The declared class
 		 * @type {String}
 		 */
-		declaredClass: property({
-			value: 'pidgin/Widget',
-			configurable: true
-		}),
+		declaredClass: 'pidgin/Widget',
 
 		/**
 		 * The identifier for the widget
 		 * @type {String}
 		 */
-		id: '',
+		id: property(getShadowDomAttributeDescriptor('node', 'data-widget-id')),
 
 		/**
 		 * The root node for the widget
@@ -62,6 +63,12 @@ define([
 		 * @type {DOMNode}
 		 */
 		sourceNode: null,
+
+		/**
+		 * The template for the widget
+		 * @type {pidgin/tmpl}
+		 */
+		template: null,
 
 		/**
 		 * The function, called by the constructor that creates the widget.
@@ -99,6 +106,7 @@ define([
 				// Call build, but again account for potential deferred returns
 				return self.build();
 			}).then(function () {
+				self.id = self.id;
 				if (self.node) {
 					// TODO: apply attributes to node
 
@@ -146,7 +154,8 @@ define([
 		 */
 		build: function () {
 			if (!this.node) {
-				readOnly(this, 'node', this.sourceNode || this.ownerDocument.createElement('div'));
+				readOnly(this, 'node', (this.template && this.template.stamp(this, this.sourceNode)) ||
+					this.sourceNode || this.ownerDocument.createElement('div'));
 			}
 		},
 

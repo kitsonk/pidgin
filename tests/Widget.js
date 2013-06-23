@@ -1,13 +1,12 @@
 define([
 	'intern!tdd',
 	'intern/chai!assert',
+	'require',
 	'../Widget',
-	'../lib/core/doc',
-	'../lib/core/on'
-], function (test, assert, Widget, doc, on) {
-	'use strict';
+	'../lib/core/doc'
+], function (test, assert, require, Widget, doc) {
 
-	/* jshint evil:true */
+	/* global Platform */
 	doc.write('<script src="../../lib/platform/platform.js" type="text/javascript"></script>');
 	if (!doc.body) {
 		doc.body = doc.createElement('body');
@@ -15,18 +14,27 @@ define([
 
 	test.suite('Widget', function () {
 		test.test('basic', function () {
-			var node = doc.createElement('button');
-			var widget = new Widget({
-				id: 'test',
-				baseClass: 'pidginWidget'
-			}, node);
-			widget.place(doc.body);
-			widget.start();
-			var handle = widget.on('click', function (e) {
-				console.log(e);
-			});
-			widget.emit('click', {});
-			assert(widget);
+			var dfd = this.async(1000);
+			require(['../tmpl!./resources/tmpl.html'], dfd.callback(function (template) {
+				var widget = new Widget({
+					id: 'test',
+					template: template,
+					label: 'Click Me!',
+					data: [{
+						name: 'Bill'
+					}, {
+						name: 'Ben'
+					}, {
+						name: 'Dylan'
+					}, {
+						name: 'Eugene'
+					}]
+				});
+				widget.place(doc.body);
+				Platform.performMicrotaskCheckpoint();
+				widget.data.push({ name: 'Kitson' });
+				Platform.performMicrotaskCheckpoint();
+			}));
 		});
 	});
 });
