@@ -35,6 +35,7 @@ require(['pidgin/Widget'], function (Widget) {
 		foo: 'bar'
 	}, 'someNode');
 });
+```
 
 *Note* Because of the way the Custom Elements works, the existing Dijit lifecycle doesn't map very well, since a lot of
 the "grunt work" is done by the underlying technologies.  Currently there are only the four methods identified in the
