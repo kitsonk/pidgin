@@ -66,7 +66,7 @@ define([
 		 * @return {DOMNode}               The MDV template DOM node
 		 */
 		stamp: function (model, referenceNode) {
-			referenceNode = referenceNode || (model && model.node);
+			referenceNode = referenceNode || model;
 			var instance = doc.createElement('template');
 			instance.setAttribute('ref', this.id);
 			instance.setAttribute('bind', '{{}}');

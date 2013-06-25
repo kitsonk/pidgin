@@ -1,15 +1,12 @@
 define([
 	'exports',
-	'./registry',
-	'./util',
+	'./tailor',
 	'./lib/core/aspect',
-	'./lib/core/compose',
 	'./lib/core/dom',
-	'./lib/core/lang',
 	'./lib/core/on',
 	'./lib/core/properties',
 	'./lib/core/when'
-], function (exports, registry, util, aspect, compose, dom, lang, on, properties, when) {
+], function (exports, tailor, aspect, dom, on, properties) {
 	'use strict';
 
 	/**
@@ -18,18 +15,9 @@ define([
 	 * @constructor
 	 */
 
-		// Creates a property in the compose prototype that is based off an EF5 descriptor
-	var property = compose.property,
-
-		// Creates property descriptors that "mirrors" DOM attributes
-		getShadowDomAttributeDescriptor = util.getShadowDomAttributeDescriptor,
-
 		// Creates a "shadow" property on the target, which is a non-enumerable value that has '_' appended to the
 		// front of it
-		shadow = properties.shadow,
-
-		// Creates a non-writable but enumerable property on the target
-		readOnly = properties.readOnly;
+	var shadow = properties.shadow;
 
 	/**
 	 * The base 'class' for Widgets
@@ -37,9 +25,7 @@ define([
 	 * @param  {DOMNode|String} [sourceNode] The node that should be used to build the widget on top of
 	 * @return {pidgin/Widget}               The instance
 	 */
-	var Widget = compose(function (properties, sourceNode) {
-		this.create(properties, sourceNode);
-	}, {
+	var Widget = tailor(HTMLElement, {
 		/**
 		 * The declared class
 		 * @type {String}
@@ -47,22 +33,10 @@ define([
 		declaredClass: 'pidgin/Widget',
 
 		/**
-		 * The identifier for the widget
+		 * The custom tag this widget will be registered with
 		 * @type {String}
 		 */
-		id: property(getShadowDomAttributeDescriptor('node', 'data-widget-id')),
-
-		/**
-		 * The root node for the widget
-		 * @type {DOMNode}
-		 */
-		node: null,
-
-		/**
-		 * The original node for the widget
-		 * @type {DOMNode}
-		 */
-		sourceNode: null,
+		customTag: 'pd-widget',
 
 		/**
 		 * The template for the widget
@@ -71,120 +45,44 @@ define([
 		template: null,
 
 		/**
-		 * The function, called by the constructor that creates the widget.
-		 * @param  {Object} properties Initial properties of the widget that should be mixed in
-		 * @param  {DOMNode} sourceNode The node that should be used to build the widget around
+		 * Called when the Custom Element is ready.
 		 */
-		create: function (properties, sourceNode) {
-			var self = this,
-				deleteSourceNode;
-
-			// this likely doesn't handle multi-doc properly
-			readOnly(self, 'sourceNode', dom.get(sourceNode));
-
-			// Maybe this mixin should be moved somewhere else in the lifecycle?  It seems early and maybe responsive
-			// values should be handled later on
-			if (properties) {
-				lang.mixin(self, properties);
-			}
-
-			// Call `postMixinProperties` but handle potentially deferred returns from the function
-			when(self.postMixinProperties()).then(function () {
-
-				// If we don't have an ID, go ahead and assign a unique one
-				if (!self.id) {
-					self.id = registry.getUID(self.declaredClass.replace(/\//g, '_'));
-				}
-
-				// Retrieve the dom manipulation library for the document related to this widget
-				shadow(self, 'dom', dom(properties.ownerDocument ||
-					(self.sourceNode ? self.sourceNode.ownerDocument : document)));
-
-				// Register the widget with the registry
-				registry.add(self);
-
-				// Call build, but again account for potential deferred returns
-				return self.build();
-			}).then(function () {
-				self.id = self.id;
-				if (self.node) {
-					// TODO: apply attributes to node
-
-					// If the node and the sourceNode aren't the same, go ahead and swap them out
-					var sourceNode = self.sourceNode;
-					if (sourceNode && sourceNode.parentNode && self.node !== sourceNode) {
-						sourceNode.parentNode.replaceChild(this.node, sourceNode);
-						deleteSourceNode = true;
-					}
-				}
-
-				// Call `postCreate` and handle a deferred return
-				return self.postCreate();
-			}).then(function () {
-				// We can safely delete the source node
-				if (deleteSourceNode) {
-					delete self.sourceNode;
-				}
-
-				// Set the `_created` flag
-				shadow(self, 'created', true);
-			});
-		},
-
-		/**
-		 * Called once the initial properties have been mixed into the widget, but the DOM for the widget has not been
-		 * built yet.
-		 * @return {Boolean|Promise} If a promise is returned, the widget lifecycle will wait until it is fulfilled
-		 */
-		postMixinProperties: function () {
-
-		},
-
-		/**
-		 * Called once the creation lifecycle is complete, but before the widget is flagged as created.
-		 * @return {Boolean|Promise} If a promise is returned, the widget lifecycle will wait until it is fulfilled
-		 */
-		postCreate: function () {
-
-		},
-
-		/**
-		 * Build the initial DOM structure for the widget
-		 * @return {Boolean|Promise} If a promise is returned, the widget lifecycle will wait until it is fulfilled
-		 */
-		build: function () {
-			if (!this.node) {
-				readOnly(this, 'node', (this.template && this.template.stamp(this, this.sourceNode)) ||
-					this.sourceNode || this.ownerDocument.createElement('div'));
+		readyCallback: function () {
+			shadow(this, 'dom', dom(this.ownerDocument || document));
+			if (this.template) {
+				this.template.stamp(this);
 			}
 		},
 
 		/**
-		 * Start the widget
+		 * Called when inserted into the document flow
 		 */
-		start: function () {
-			if (this._started) {
-				return;
-			}
-			shadow(this, 'started', true);
+		insertedCallback: function () {
+
 		},
 
 		/**
-		 * Place the widget in the document
-		 * @param  {String|pidgen/Widget|DOMNode} reference  The referenced string (which would identify a widget or DOM
-		 *                                                   node ID), a Widget instance, or a DOMNode
-		 * @param  {String|Number}                [selector] If adding to a widget that handles children, then the
-		 *                                                   numerical position of this child, otherwise the dom library
-		 *                                                   selector to identify where to place the widget.
+		 * Called when removed from the document flow
+		 */
+		removedCallback: function () {
+
+		},
+
+		/**
+		 * Called when an attribute is changed
+		 */
+		attributeChangedCallback: function (/*attributeName*/) {
+
+		},
+
+		/**
+		 * Place the widget somewhere in the DOM.  Defaults to appending a child of the referenced node.
+		 * @param  {HTMLElement|String} reference  The reference node or ID of the node
+		 * @param  {String}             [selector] The optional selector for inserting the node (e.g. '>' for child or
+		 *                                         '+' as next sibling)
 		 */
 		place: function (reference, selector) {
-			var referenceWidget = !reference.tagName && registry.byId(reference);
-			if (referenceWidget && referenceWidget.addChild && (!selector || typeof selector !== 'number')) {
-				referenceWidget.addChild(this, selector);
-			}
-			else {
-				this._dom.add(this._dom.get(reference), selector || '>', this.node);
-			}
+			this._dom.add(this._dom.get(reference), selector || '>', this);
 		},
 
 		/**
@@ -194,7 +92,7 @@ define([
 		 * @return {Object}			   A handle object that contains a `.remove()` method to remove the listener
 		 */
 		on: function (type, listener) {
-			return this.own(on.parse(this.node, type, listener, function (target, type) {
+			return this.own(on.parse(this, type, listener, function (target, type) {
 				return aspect.after(target, 'on' + type, listener, true);
 			}));
 		},
@@ -205,7 +103,7 @@ define([
 		 *                   event is cancelable and the event is cancelled, emit will return false.
 		 */
 		emit: function (/*type, event*/) {
-			var args = [ this.node ];
+			var args = [ this ];
 			args.push.apply(args, arguments);
 			return on.emit.apply(on, args);
 		},
@@ -237,50 +135,9 @@ define([
 		},
 
 		/**
-		 * Destroy the widget
-		 * @param  {Boolean} [preserveDom] If `true` then do not remove any generated DOM
+		 * Provides a string representation of the Widget
+		 * @return {String} The string that represents the Widget
 		 */
-		destroy: function (preserveDom) {
-			shadow(this, 'destroying', true);
-
-			function destroy(w) {
-				if (w.destroyRecursive) {
-					w.destroyRecursive(preserveDom);
-				}
-				else if (w.destroy) {
-					w.destory(preserveDom);
-				}
-			}
-
-			if (this.node) {
-				registry.find(this.node, this.containerNode).forEach(destroy);
-			}
-
-			this.destroyRendering(preserveDom);
-			registry.remove(this.node);
-			shadow(this, 'destroyed', true);
-		},
-
-		/**
-		 * Destroy any of the rendered DOM for the widget
-		 * @param  {Boolean} [preserveDom] If `true`, the DOM will actually be removed from the document flow, but only
-		 *                                 dereferenced from the widget object
-		 */
-		destroyRendering: function (preserveDom) {
-			if (this.node) {
-				if (!preserveDom) {
-					this._dom.remove(this.node);
-				}
-				delete this.node;
-			}
-			if (this.sourceNode) {
-				if (!preserveDom) {
-					this._dom.remove(this.sourceNode);
-				}
-				delete this.sourceNode;
-			}
-		},
-
 		toString: function () {
 			return '[Widget ' + this.declaredClass + ', ' + (this.id || 'NO ID') + ']';
 		}

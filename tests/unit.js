@@ -1,6 +1,7 @@
 define([
+	'./ready',
+	'./tailor',
 	'./tmpl',
-	'./registry',
 	'./util',
 	'./Widget'
 ], 1);

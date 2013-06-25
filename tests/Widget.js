@@ -6,12 +6,6 @@ define([
 	'../lib/core/doc'
 ], function (test, assert, require, Widget, doc) {
 
-	/* global Platform */
-	doc.write('<script src="../../lib/platform/platform.js" type="text/javascript"></script>');
-	if (!doc.body) {
-		doc.body = doc.createElement('body');
-	}
-
 	test.suite('Widget', function () {
 		test.test('basic', function () {
 			var dfd = this.async(1000);

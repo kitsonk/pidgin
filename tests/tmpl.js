@@ -1,15 +1,11 @@
 define([
 	'intern!tdd',
 	'intern/chai!assert',
-	'require',
-	'../lib/core/doc'
-], function (test, assert, require, doc) {
+	'require'
+], function (test, assert, require) {
 	'use strict';
 
 	/* global Platform */
-	var platformScript = doc.createElement('script');
-	platformScript.src = '../../lib/platform/platform.min.js';
-	doc.querySelector('head').appendChild(platformScript);
 
 	test.suite('tmpl', function () {
 		test.test('plugin', function () {
