@@ -2,7 +2,10 @@
 <html>
 <head>
 	<title>pidgin basic</title>
+	<!-- The Polymer Platform -->
 	<script src="../lib/platform/platform.js"></script>
+
+	<!-- Using the intern AMD loader for the time being -->
 	<script src="../node_modules/intern/node_modules/dojo/dojo.js"></script>
 	<script type="text/javascript">
 	require({
@@ -15,12 +18,14 @@
 			location: '.'
 		}]
 	},[
-		'pidgin/Widget',
-		'pidgin/tailor',
+		'pidgin/Widget', // The "base class" for Pidgin Widgets
+		'pidgin/tailor',  // The special Custom Element compositor
 		'core/dom',
-		'pidgin/tmpl!./examples/resources/ButtonWidget.html',
-		'pidgin/tmpl!./examples/resources/ListWidget.html'
+		'pidgin/tmpl!./examples/resources/ButtonWidget.html',  // An MDV template
+		'pidgin/tmpl!./examples/resources/ListWidget.html'  // Another MDV template
 	], function (Widget, tailor, dom, tmplButtonWidget, tmplListWidget) {
+
+		// "Tailoring" a button widget, only bindable value is label
 		var ButtonWidget = tailor(Widget, {
 			declaredClass: 'pidgin/ButtonWidget',
 			customTag: 'pd-button-widget',
@@ -28,6 +33,7 @@
 			label: ''
 		});
 
+		// "Tailoring" a unordered list widget, template binds and iterates over items.
 		var ListWidget = tailor(Widget, {
 			declaredClass: 'pidgin/ListWidget',
 			customTag: 'pd-list-widget',
@@ -35,6 +41,7 @@
 			items: []
 		});
 
+		// Instantiate the list
 		var list1 = new ListWidget({
 			id: 'list1',
 			items: [{
@@ -48,9 +55,11 @@
 			}]
 		}, 'swap');
 
+		// Retrieve a reference to the button... The Widget is the Node the Node is the Widget!!!
 		var button1 = dom.get('button1');
 		button1.label = 'Click Me!';
 		button1.on('click', function () {
+			// Just reordering things...
 			list1.items.push(list1.items.shift());
 			Platform.performMicrotaskCheckpoint();
 		});
@@ -62,7 +71,10 @@
 </head>
 <body>
 	<h1>pidgin basic</h1>
+
+	<!-- Look Ma, no dojo/parser -->
 	<pd-button-widget id="button1"></pd-button-widget>
+
 	<div id="swap"></div>
 </body>
 </html>	
