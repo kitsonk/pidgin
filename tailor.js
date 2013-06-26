@@ -203,7 +203,7 @@ define([
 
 		// Only objects which have HTMLElement in the prototype chain can be registered as a Custom Element
 		if (!(proto instanceof HTMLElement)) {
-			throw new SyntaxError('base must include HTMLElement in prototype chain.');
+			throw new TypeError('base must include HTMLElement in prototype chain.');
 		}
 
 		// mix the extensions into the prototype
@@ -211,7 +211,7 @@ define([
 
 		// 'customTag' should be present in the resulting prototype so we can use it to register the Custom Element
 		if (!('customTag' in proto)) {
-			throw new SyntaxError('Unable to resolve custom tag.  "customTag" must be specified.');
+			throw new TypeError('Unable to resolve custom tag.  "customTag" must be specified.');
 		}
 
 		// Check to see if this custom tag is already used 
