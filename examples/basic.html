@@ -2,6 +2,14 @@
 <html>
 <head>
 	<title>pidgin basic</title>
+	<style>
+	@import '../themes/claro/claro.css';
+
+	body.claro {
+		padding: 1em;
+	}
+	</style>
+
 	<!-- The Polymer Platform -->
 	<script src="../lib/platform/platform.js"></script>
 
@@ -18,23 +26,22 @@
 			location: '.'
 		}]
 	},[
-		'pidgin/Widget', // The "base class" for Pidgin Widgets
-		'pidgin/tailor',  // The special Custom Element compositor
+		'pidgin/_Widget', // The "base class" for Pidgin Widgets
+		'pidgin/widgets',  // The pidgin widget utility module
 		'core/dom',
 		'pidgin/tmpl!./examples/resources/ButtonWidget.html',  // An MDV template
 		'pidgin/tmpl!./examples/resources/ListWidget.html'  // Another MDV template
-	], function (Widget, tailor, dom, tmplButtonWidget, tmplListWidget) {
+	], function (_Widget, widgets, dom, tmplButtonWidget, tmplListWidget) {
 
 		// "Tailoring" a button widget, only bindable value is label
-		var ButtonWidget = tailor(Widget, {
+		var ButtonWidget = widgets.register('pd-button-widget', [ HTMLElement, _Widget ], {
 			declaredClass: 'pidgin/ButtonWidget',
-			customTag: 'pd-button-widget',
 			template: tmplButtonWidget,
 			label: ''
 		});
 
 		// "Tailoring" a unordered list widget, template binds and iterates over items.
-		var ListWidget = tailor(Widget, {
+		var ListWidget = widgets.register('pd-list-widget', [ HTMLElement, _Widget ], {
 			declaredClass: 'pidgin/ListWidget',
 			customTag: 'pd-list-widget',
 			template: tmplListWidget,
@@ -42,18 +49,19 @@
 		});
 
 		// Instantiate the list
-		var list1 = new ListWidget({
-			id: 'list1',
-			items: [{
-				label: 'Bill'
-			}, {
-				label: 'Ben'
-			}, {
-				label: 'Kris'
-			}, {
-				label: 'Eugene'
-			}]
-		}, 'swap');
+		var list1 = new ListWidget();
+		list1.id = 'list1';
+		list1.items = [{
+			label: 'Bill'
+		}, {
+			label: 'Ben'
+		}, {
+			label: 'Kris'
+		}, {
+			label: 'Eugene'
+		}];
+
+		document.body.appendChild(list1);
 
 		// Retrieve a reference to the button... The Widget is the Node the Node is the Widget!!!
 		var button1 = dom.get('button1');
@@ -69,12 +77,10 @@
 	});
 	</script>
 </head>
-<body>
+<body class="claro">
 	<h1>pidgin basic</h1>
 
 	<!-- Look Ma, no dojo/parser -->
 	<pd-button-widget id="button1"></pd-button-widget>
-
-	<div id="swap"></div>
 </body>
 </html>	

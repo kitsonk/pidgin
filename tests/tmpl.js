@@ -25,5 +25,19 @@ define([
 				Platform.performMicrotaskCheckpoint();
 			}));
 		});
+		test.test('stamp', function () {
+			var dfd = this.async(1000);
+			var t2 = document.createElement('t2');
+			document.body.appendChild(t2);
+			t2.id = 't2';
+			t2.items = [{
+				value: 'foo'
+			}, {
+				value: 'bar'
+			}];
+			require(['../tmpl!./resources/tmplStamp.html'], dfd.callback(function (tmpl) {
+				tmpl.stamp(t2);
+			}));
+		});
 	});
 });

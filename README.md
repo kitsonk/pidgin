@@ -10,11 +10,11 @@ The main design goals of this prototype are:
 * Leverage AMD
 * Fit well into Dojo 2
 
-## pidgin/Widget ##
+## pidgin/_Widget ##
 
-`Widget` is very roughly a [Dijit][] like AMD Widget that leverages the next generation of browser technologies,
-including [Custom Elements][], [Pointer Events][] and [Model Driven Views][MDV].  While it tries to be like Dijit where
-it can, there are some fundamental concept shifts:
+`_Widget` is very roughly a [Dijit][] like AMD abstract class Widget that leverages the next generation of browser
+technologies, including [Custom Elements][], [Pointer Events][] and [Model Driven Views][MDV].  While it tries to be
+like Dijit where it can, there are some fundamental concept shifts:
 
 * The node is the widget and the widget is the node.  By using Custom Elements, the constructor for all widgets is based
   off of the `HTMLElement` DOM object.This has several advantages, in that as you manipulate the DOM nodes, you are also
@@ -26,40 +26,28 @@ it can, there are some fundamental concept shifts:
 
 * It directly supports reactive templating (based on `pidgin/tmpl` and MDV) directly in the base Widget.
 
-It does support the same instantiation API though that you are familiar with from Dijit:
-
-```js
-require(['pidgin/Widget'], function (Widget) {
-	// Create a widget which replaces an existing DOM node identified by an ID
-	var myWidget = new Widget({
-		foo: 'bar'
-	}, 'someNode');
-});
-```
-
 *Note* Because of the way the Custom Elements works, the existing Dijit lifecycle doesn't map very well, since a lot of
 the "grunt work" is done by the underlying technologies.  Currently there are only the four methods identified in the
 working specification for Custom Elements: `readyCallback`, `insertedCallback`, `removedCallback` and
 `attributeChangedCallback`.  This may change in the future.
 
-## pidgin/tailor ##
+## pidgin/widgets ##
 
-`tailor` is a specialised object compositor that is similar to ComposeJS, Dojo's declare or dcl.  It is specifically
-designed to create and register [Custom Elements][].  If for example you wanted to create a new widget class, you would
-do something like:
+`widgets` is the utility module of pidgin.  Currently its only purpose is to register widgets with the current document.
+
+For example, to create and register a new type of widget you would do something like:
 
 ```js
-require(['pidgin/tailor', 'pidgin/Widget'], function (tailor, Widget) {
-	var XWidget = tailor(Widget, {
-		declaredClass: 'x/Widget',
-		customTag: 'x-widget'
+require(['pidgin/widgets', 'pidgin/_Widget'], function (widgets, _Widget) {
+	var MyWidget = widget.register('x-my-widget', [ HTMLElement, _Widget ], {
+		foo: 'bar'
 	});
 
-	// create a widget instance
-	var x1 = new XWidget();
+	// new works
+	var myWidget1 = new MyWidget();
 
-	// or create it via its tag
-	var x2 = document.createElement('x-widget');
+	// creation by tag works
+	var myWidget2 = document.createElement('x-my-widget');
 });
 ```
 

@@ -2,9 +2,11 @@ define([
 	'intern!tdd',
 	'intern/chai!assert',
 	'require',
-	'../Widget',
+	'../_Widget',
 	'../lib/core/doc'
 ], function (test, assert, require, Widget, doc) {
+
+	/* global Platform */
 
 	test.suite('Widget', function () {
 		test.test('basic', function () {

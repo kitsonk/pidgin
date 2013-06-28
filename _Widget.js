@@ -1,12 +1,11 @@
 define([
 	'exports',
-	'./tailor',
 	'./lib/core/aspect',
 	'./lib/core/dom',
 	'./lib/core/on',
 	'./lib/core/properties',
-	'./lib/core/when'
-], function (exports, tailor, aspect, dom, on, properties) {
+	'./lib/dcl/dcl'
+], function (exports, aspect, dom, on, properties, dcl) {
 	'use strict';
 
 	/**
@@ -25,18 +24,19 @@ define([
 	 * @param  {DOMNode|String} [sourceNode] The node that should be used to build the widget on top of
 	 * @return {pidgin/Widget}               The instance
 	 */
-	var Widget = tailor(HTMLElement, {
-		/**
-		 * The declared class
-		 * @type {String}
-		 */
-		declaredClass: 'pidgin/Widget',
+	var _Widget = dcl(null, {
 
 		/**
-		 * The custom tag this widget will be registered with
+		 * The declared class identifier
 		 * @type {String}
 		 */
-		customTag: 'pd-widget',
+		declaredClass: 'pidgin/_Widget',
+
+		/**
+		 * A flag that identifies this is a pidgin widget
+		 * @type {Boolean}
+		 */
+		isPidginWidget: true,
 
 		/**
 		 * The template for the widget
@@ -144,5 +144,5 @@ define([
 	});
 
 	/* jshint boss:true */
-	return exports = Widget;
+	return exports = _Widget;
 });

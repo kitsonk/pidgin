@@ -1,24 +1,26 @@
 {
-	"name": "pidgin",
-	"version": "0.0.1",
-	"devDependencies": {
-		"intern": "git+https://github.com/kitsonk/intern.git#3b5185e"
-	},
-	"licenses": [
-		{
-			"type": "BSD-3-Clause",
-			"url": "https://github.com/kitsonk/pidgin/blob/master/LICENSE"
-		}
-	],
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/kitsonk/pidgin.git"
-	},
-	"directories": {
-		"test": "tests"
-	},
-	"readmeFile": "README.md",
-	"homepage": "https://github.com/kitsonk/pidgin",
-	"bugs": "https://github.com/kitsonk/pidgin/issues",
-	"dojoBuild": "package.js"
+  "name": "pidgin",
+  "version": "0.0.2",
+  "devDependencies": {
+    "intern": "git+https://github.com/kitsonk/intern.git#3b5185e",
+    "stylus": "~0.32.1",
+    "nib": "~0.9.2"
+  },
+  "licenses": [
+    {
+      "type": "BSD-3-Clause",
+      "url": "https://github.com/kitsonk/pidgin/blob/master/LICENSE"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kitsonk/pidgin.git"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "readmeFile": "README.md",
+  "homepage": "https://github.com/kitsonk/pidgin",
+  "bugs": "https://github.com/kitsonk/pidgin/issues",
+  "dojoBuild": "package.js",
 }

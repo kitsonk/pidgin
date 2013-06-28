@@ -4,16 +4,15 @@ define([
 	'./util',
 	'./lib/core/has!host-browser?./lib/core/request',
 	'./lib/core/has!host-node?./lib/core/node!fs',
-	'./lib/core/compose',
 	'./lib/core/has',
-	'./lib/core/doc'
-], function (exports, require, util, request, fs, compose, has, doc) {
+	'./lib/core/doc',
+	'./lib/dcl/dcl'
+], function (exports, require, util, request, fs, has, doc, dcl) {
 	'use strict';
 
 	/* global HTMLTemplateElement */
 
-	var property = compose.property,
-		getDomAttributeDescriptor = util.getDomAttributeDescriptor;
+	var getDomAttributeDescriptor = util.getDomAttributeDescriptor;
 
 	var notFound = {},
 		pending = {},
@@ -33,25 +32,41 @@ define([
 	 * @param  {DOMNode}  appendNode A reference node to append the template, defaults to `document.body`
 	 * @return {Template}            An instance of Template
 	 */
-	var Template = compose(function (id, text, appendNode) {
-		this.node = doc.createElement('template');
-		if (id) {
-			this.id = id;
-		}
-		if (text) {
-			this.node.innerHTML = text;
-		}
-		appendNode = appendNode || doc.body;
-		if (appendNode) {
-			appendNode.appendChild(this.node);
-		}
-		decorateTemplates(this.node);
-	}, {
+	var Template = dcl(null, {
+		/**
+		 * The declared class name
+		 * @type {String}
+		 */
+		declaredClass: 'pidgin/Template',
+
+		/**
+		 * The construction function for Template
+		 * @param  {String}          id           The ID of the template
+		 * @param  {String}          text         The text of the template
+		 * @param  {Element}         [appendNode] An element to append the template DOM structure to
+		 * @return {pidgin/Template}              The template instance
+		 */
+		constructor: function (id, text, appendNode) {
+			this.node = doc.createElement('template');
+			if (id) {
+				this.id = id;
+			}
+			if (text) {
+				this.node.innerHTML = text;
+			}
+			appendNode = appendNode || doc.body;
+			if (appendNode) {
+				appendNode.appendChild(this.node);
+			}
+			decorateTemplates(this.node);
+		},
+
 		/**
 		 * The unique identifier for the template
 		 * @type {String}
 		 */
-		id: property(getDomAttributeDescriptor('node', 'id')),
+		// ES5 property descriptors not currently supported by dcl
+		// id: property(getDomAttributeDescriptor('node', 'id')),
 
 		/**
 		 * The root `<template>` DOMNode for this template
@@ -78,6 +93,9 @@ define([
 			return instance;
 		}
 	});
+
+	// ES5 property descriptors not currently supported by dcl
+	Object.defineProperty(Template.prototype, 'id', getDomAttributeDescriptor('node', 'id'));
 
 	var getText,
 		pathUtil;
