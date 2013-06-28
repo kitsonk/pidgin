@@ -4,3 +4,6 @@
 [submodule "lib/dcl"]
 	path = lib/dcl
 	url = https://github.com/uhop/dcl.git
+[submodule "lib/core"]
+	path = lib/core
+	url = https://github.com/kitsonk/core.git
