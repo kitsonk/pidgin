@@ -19,7 +19,12 @@ like Dijit where it can, there are some fundamental concept shifts:
 * The node is the widget and the widget is the node.  By using Custom Elements, the constructor for all widgets is based
   off of the `HTMLElement` DOM object.This has several advantages, in that as you manipulate the DOM nodes, you are also
   dealing with the widget instances.This also means there is no widget registry, because the document is effectively the
-  registry.You can use whatever DOM manipulation API you want to move the widget around.
+  registry. You can use whatever DOM manipulation API you want to move the widget around.
+
+* One of the benefits of Custom Elements is that the specification allows you to create your own "valid" attributes.
+  A developer can specify attributes to be copied to properties during initialisation of the widget.  Combined with the 
+  ability to declare an instance of a widget via its custom tag, this effectively means there is no need for a
+  dojo/parser to be able to provide the "declarative syntax".
 
 * It leverages ES5 accessor properties instead of using the discreet accessors.  This means there is no `widget.get()`
   and `widget.set()`.  You can affect the widget directly.
@@ -29,7 +34,35 @@ like Dijit where it can, there are some fundamental concept shifts:
 *Note* Because of the way the Custom Elements works, the existing Dijit lifecycle doesn't map very well, since a lot of
 the "grunt work" is done by the underlying technologies.  Currently there are only the four methods identified in the
 working specification for Custom Elements: `readyCallback`, `insertedCallback`, `removedCallback` and
-`attributeChangedCallback`.  This may change in the future.
+`attributeChangedCallback`.  This may change in the future.  Currently, _Widget provides a `readyCallback` and does some
+initialisation of the instance (mapping attributes and stamping out templates).  It will also call '.startup()' which is
+the current location to do additional initialisation activities, though the whole lifecycle is under development.
+
+## pidgin/Button ##
+
+This is a widget that extends the HTMLButtonElement interface.  Its custom tag is `pd-button`.  To instantiate it
+declaratively, you would do this:
+
+```html
+<pd-button>Click Me!</pd-button>
+<!-- or -->
+<pd-button label="Click Me!"></pd-button>
+```
+
+Do instantiate it programmatically you would do something like this:
+
+```js
+require(['pidgin/Button'], function (Button) {
+	var button1 = new Button();
+	button1.label = 'Click Me!';
+	button1.place(document.body);
+
+	/* Or create it via its tag */
+	var button2 = document.createElement('pd-button');
+	button2.label = 'Click me Instead!';
+	document.body.appendNode(button2);
+});
+```
 
 ## pidgin/widgets ##
 
@@ -39,7 +72,7 @@ For example, to create and register a new type of widget you would do something 
 
 ```js
 require(['pidgin/widgets', 'pidgin/_Widget'], function (widgets, _Widget) {
-	var MyWidget = widget.register('x-my-widget', [ HTMLElement, _Widget ], {
+	var MyWidget = widget.register('x-my-widget', HTMLElement, _Widget, {
 		foo: 'bar'
 	});
 
@@ -55,45 +88,6 @@ require(['pidgin/widgets', 'pidgin/_Widget'], function (widgets, _Widget) {
 
 `tmpl` is an AMD plugin for loading and referencing [MDV][] templates.  It is specifically designed to work well with
 `Widget`.
-
-## Examples ##
-
-In order to create a widget that dynamically provided a list of users in an unordered-list, I would create a template
-file named `UserNameList.html`:
-
-```html
-<ul>
-	<template repeat="{{ data }}">
-		<li>{{ name }}</li>
-	</template>
-</ul>
-```
-
-I would then want to load and create my widget:
-
-```js
-require(['pidgin/Widget', 'pidgin/tmpl!./UserNameList.html'], function (Widget, template) {
-	var widget = new Widget({
-		template: template,
-		data: [{
-			name: 'Bob'
-		}, {
-			name: 'Bill'
-		}, {
-			name: 'Ben'
-		}]
-	});
-
-	// Add the widget to the DOM
-	widget.place(document.body);
-
-	// Needed when using Polymer/platform on non-Object.observe platforms
-	Platform.performMicrotaskCheckpoint();
-});
-```
-
-This would then generate a widget which presents itself as an unordered list with three list items of "Bob", "Bill" and
-"Ben".  Adding or removing items from data would cause the DOM presentation to change accordingly.
 
 [Polymer/platform]: https://github.com/Polymer/platform
 [Dijit]: https://github.com/dojo/dijit

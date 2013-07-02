@@ -1,22 +1,77 @@
 define([
 	'exports',
 	'./lib/core/aspect',
+	'./lib/core/compose',
 	'./lib/core/dom',
+	'./lib/core/lang',
 	'./lib/core/on',
-	'./lib/core/properties',
-	'./lib/dcl/dcl'
-], function (exports, aspect, dom, on, properties, dcl) {
+	'./lib/core/properties'
+], function (exports, aspect, compose, dom, lang, on, properties) {
 	'use strict';
 
 	/**
-	 * Widget Class
-	 * @class pidgin/Widget
+	 * Widget Mixin/Class
+	 * @class pidgin/_Widget
 	 * @constructor
 	 */
 
-		// Creates a "shadow" property on the target, which is a non-enumerable value that has '_' appended to the
-		// front of it
+	// Creates a "shadow" property on the target, which is a non-enumerable value that has '_' appended to the
+	// front of it
 	var shadow = properties.shadow;
+
+	/**
+	 * Map attributes from the item into properties of the item. The items to be mapped are defined within
+	 * item.attributeMap
+	 * @param  {pidgin/_Widget} item The target item to be mapped
+	 */
+	function mapAttributes(item) {
+		var attributeMap = typeof item.attributeMap === 'string' ? item.attributeMap.split(/\s+/) : item.attributeMap,
+			type, value;
+
+		function stringToObject(value) {
+			var obj;
+
+			try {
+				/* jshint evil:true */
+				obj = eval('(' + (value[0] === '{' ? '' : '{') + value + (value[0] === '{' ? '' : '}') + ')');
+			}
+			catch (e) {
+				throw new SyntaxError('Error in attribute conversion to object: ' + e.message + '\nAttribute Value: "' +
+					value + '"');
+			}
+			return obj;
+		}
+
+		attributeMap.forEach(function (name) {
+			if (item.hasAttribute(name)) {
+				value = item.getAttribute(name);
+				type = typeof item[name];
+				switch (type) {
+				case 'string':
+					item[name] = value;
+					break;
+				case 'number':
+					item[name] = value - 0;
+					break;
+				case 'boolean':
+					item[name] = value !== 'false';
+					break;
+				case 'object':
+					if (item[name] instanceof Array) {
+						item[name] = value ? value.split(/\s+/) : [];
+					}
+					else {
+						item[name] = stringToObject(value);
+					}
+					break;
+				case 'function':
+					/* jshint evil:true */
+					item[name] = lang.getObject(value, false) || new Function(value);
+					break;
+				}
+			}
+		});
+	}
 
 	/**
 	 * The base 'class' for Widgets
@@ -24,19 +79,19 @@ define([
 	 * @param  {DOMNode|String} [sourceNode] The node that should be used to build the widget on top of
 	 * @return {pidgin/Widget}               The instance
 	 */
-	var _Widget = dcl(null, {
-
-		/**
-		 * The declared class identifier
-		 * @type {String}
-		 */
-		declaredClass: 'pidgin/_Widget',
-
+	var _Widget = compose({
 		/**
 		 * A flag that identifies this is a pidgin widget
 		 * @type {Boolean}
 		 */
 		isPidginWidget: true,
+
+		/**
+		 * A list of attributes that mirror properties on the widget which is either an array of strings or a string
+		 * where the attribute names are separated by spaces
+		 * @type {Array|String}
+		 */
+		attributeMap: null,
 
 		/**
 		 * The template for the widget
@@ -48,10 +103,32 @@ define([
 		 * Called when the Custom Element is ready.
 		 */
 		readyCallback: function () {
+			// Shadows the dom manipulation library for this widget
 			shadow(this, 'dom', dom(this.ownerDocument || document));
+
+			// If there are any attributes to be mapped, map them
+			if (this.attributeMap) {
+				mapAttributes(this);
+			}
+
+			// Call startup method if present
+			if (this.startup) {
+				this.startup.call(this);
+			}
+
+			// If there is a template, stamp it out.
 			if (this.template) {
 				this.template.stamp(this);
 			}
+		},
+
+		/**
+		 * Called during readyCallback.  This can be defined downstream to do any custom functionality to initialise
+		 * the instance.  It occurs between any attributes being mapped from the widget and before the template gets
+		 * stamped out.
+		 */
+		startup: function () {
+
 		},
 
 		/**

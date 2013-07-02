@@ -3,14 +3,14 @@
 <head>
 	<title>pidgin basic</title>
 	<style>
-	@import '../themes/claro/claro.css';
+	@import '../themes/claro/base.css';
 
 	body.claro {
 		padding: 1em;
 	}
 	</style>
 
-	<!-- Polyfill for DOM Promises -->
+	<!-- Polyfill for DOM Promises (not currently used) -->
 	<script scr="../lib/core/third_party/Promises/polyfill/bin/Promise.min.js"></script>
 
 	<!-- The Polymer Platform -->
@@ -29,31 +29,24 @@
 			location: '.'
 		}]
 	},[
-		'pidgin/_Widget', // The "base class" for Pidgin Widgets
+		'pidgin/_Widget', // The base "mixin" for Pidgin Widgets
+		'pidgin/Button',  // The button class
 		'pidgin/widgets',  // The pidgin widget utility module
-		'core/dom',
-		'pidgin/tmpl!./examples/resources/ButtonWidget.html',  // An MDV template
-		'pidgin/tmpl!./examples/resources/ListWidget.html'  // Another MDV template
-	], function (_Widget, widgets, dom, tmplButtonWidget, tmplListWidget) {
+		'core/dom',  // A dom manipulation library
+		'pidgin/tmpl!./examples/resources/ListWidget.html'  // The MDV Template for the List Widget
+	], function (_Widget, Button, widgets, dom, tmplListWidget) {
 
-		// "Tailoring" a button widget, only bindable value is label
-		var ButtonWidget = widgets.register('pd-button-widget', [ HTMLElement, _Widget ], {
-			declaredClass: 'pidgin/ButtonWidget',
-			template: tmplButtonWidget,
-			label: ''
-		});
-
-		// "Tailoring" a unordered list widget, template binds and iterates over items.
-		var ListWidget = widgets.register('pd-list-widget', [ HTMLElement, _Widget ], {
-			declaredClass: 'pidgin/ListWidget',
-			customTag: 'pd-list-widget',
+		/* "Tailoring" a unordered list widget, template binds and iterates over items. */
+		var ListWidget = widgets.register('pd-list-widget', HTMLElement, _Widget, {
 			template: tmplListWidget,
 			items: []
 		});
 
-		// Instantiate the list
+		/* Instantiate the list */
 		var list1 = new ListWidget();
 		list1.id = 'list1';
+
+		/* The template's model is the widget, and the template then specifies that we repeat widget.items. */
 		list1.items = [{
 			label: 'Bill'
 		}, {
@@ -64,13 +57,15 @@
 			label: 'Eugene'
 		}];
 
-		document.body.appendChild(list1);
+		/* Using the place functionality */
+		list1.place(document.body);
 
-		// Retrieve a reference to the button... The Widget is the Node the Node is the Widget!!!
+		/* Retrieve a reference to the button... The Widget is the Node the Node is the Widget!!! */
 		var button1 = dom.get('button1');
-		button1.label = 'Click Me!';
+
+		/* One of the things that is added via _Widget is '.on()' */
 		button1.on('click', function () {
-			// Just reordering things...
+			/* Just reordering things... */
 			list1.items.push(list1.items.shift());
 			Platform.performMicrotaskCheckpoint();
 		});
@@ -84,6 +79,7 @@
 	<h1>pidgin basic</h1>
 
 	<!-- Look Ma, no dojo/parser -->
-	<pd-button-widget id="button1"></pd-button-widget>
+	<button is="pd-button" id="button1" label="Click Me!"></button>
+	<button is="pd-button" id="button2" disabled>Don't Click Me!</button>
 </body>
 </html>	

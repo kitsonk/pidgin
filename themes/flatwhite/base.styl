@@ -1,0 +1,47 @@
+@import 'nib'
+
+button-color-border = #c3c3c3
+button-color-bg = #ffffff
+button-color-bg-hover = #c8def4
+button-color-bd-disabled = #cccccc
+theme-color-text = #1c1c1c
+theme-color-text-hover = #002a54
+theme-color-text-disabled = #666666
+
+.flatwhite
+  color theme-color-text
+  font-family Tahoma, Verdana, Arial, sans-serif
+  font-size 14px
+  margin 0
+  padding 0
+  background-color #fefefe
+  {'[is=pd-button]'}
+    background-color rgba(button-color-bg, 0.9)
+    border 1px solid button-color-border
+    border-radius 1px
+    box-shadow 0 0 2px rgba(black, 0.15)
+    cursor pointer
+    margin 0.2em
+    padding 0.5em
+    transition-duration 0.3s
+    transition-property background-color
+    .pd-label
+      color theme-color-text
+      font-size 14px
+      font-weight bold
+      text-align center
+    &:hover
+      background-color rgba(button-color-bg-hover, 0.9)
+      transition-duration 0.2s
+      .pd-label
+        color theme-color-text-hover
+    &:active
+      background-color button-color-bg-hover
+      box-shadow inset 0 0 3px rgba(white, 0.3)
+      transition-duration 0.1s
+    &:disabled
+      background-color button-color-bd-disabled
+      box-shadow none
+      cursor auto
+      .pd-label
+        color theme-color-text-disabled

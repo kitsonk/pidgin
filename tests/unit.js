@@ -1,7 +1,7 @@
 define([
+	'./_Widget',
+	'./Button',
 	'./ready',
 	'./tmpl',
-	'./util',
-	'./Widget',
 	'./widgets'
 ], 1);
