@@ -22,5 +22,5 @@
   "readmeFile": "README.md",
   "homepage": "https://github.com/kitsonk/pidgin",
   "bugs": "https://github.com/kitsonk/pidgin/issues",
-  "dojoBuild": "package.js",
+  "dojoBuild": "package.js"
 }
