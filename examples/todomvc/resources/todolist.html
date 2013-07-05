@@ -1,0 +1,14 @@
+<input id="toggle-all" type="checkbox">
+<label for="toggle-all">Mark all as complete</label>
+<ul id="todo-list">
+	<template repeat="{{ list }}">
+		<li class="{{ status }}">
+			<div class="view">
+				<input class="toggle" type="checkbox" checked>
+				<label>{{ text }}</label>
+				<button class="destroy"></button>
+			</div>
+			<input class="edit" value="{{ text }}">
+		</li>
+	</template>
+</ul>
