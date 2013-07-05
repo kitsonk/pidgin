@@ -18,7 +18,10 @@ define([
 
 	// Creates a "shadow" property on the target, which is a non-enumerable value that has '_' appended to the
 	// front of it
-	var shadow = properties.shadow;
+	var shadow = properties.shadow,
+
+		// Decorator for ES5 properties
+		property = compose.property;
 
 	/**
 	 * Map attributes from the item into properties of the item. The items to be mapped are defined within
@@ -189,6 +192,32 @@ define([
 		place: function (reference, selector) {
 			this._dom.add(this._dom.get(reference), selector || '>', this);
 		},
+
+		/**
+		 * Hide the widget
+		 */
+		hide: function () {
+			this._dom.modify(this, '.pd-hidden');
+		},
+
+		/**
+		 * Show the widget
+		 */
+		show: function () {
+			this._dom.modify(this, '!.pd-hidden');
+		},
+
+		/**
+		 * Returns if the widget is currently hidden or not 
+		 * @type {Boolean}
+		 */
+		isHidden: property({
+			get: function () {
+				return window.getComputedStyle(this, null).getPropertyValue('display') === 'none';
+			},
+			enumerable: true,
+			configurable: true
+		}),
 
 		/**
 		 * Add a listener for a target
