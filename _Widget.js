@@ -16,8 +16,8 @@ define([
 	 * @constructor
 	 */
 
-	// Creates a "shadow" property on the target, which is a non-enumerable value that has '_' appended to the
-	// front of it
+		// Creates a "shadow" property on the target, which is a non-enumerable value that has '_' appended to the
+		// front of it
 	var shadow = properties.shadow,
 
 		// Decorator for ES5 properties
@@ -78,6 +78,28 @@ define([
 	}
 
 	/**
+	 * Execute the "creation" lifecycle of the widget, where the DOM manipulation library is shadowed, attributes are
+	 * mapped from the widget to its properties, the `.created()` method is called and if present, the template is
+	 * stamped out.
+	 */
+	function createdCallback() {
+		var self = this;
+		// Shadows the dom manipulation library for this widget
+		shadow(self, 'dom', dom(self.ownerDocument || document));
+
+		// If there are any attributes to be mapped, map them
+		if (self.attributeMap) {
+			mapAttributes(self);
+		}
+
+		when(self.created ? self.created.call(self) : false).then(function () {
+			if (self.template) {
+				return self.template ? self.template.stamp(self) : false;
+			}
+		});
+	}
+
+	/**
 	 * The base 'class' for Widgets
 	 * @param  {Object}         properties   Initial properties which should be mixed into the widget during creation
 	 * @param  {DOMNode|String} [sourceNode] The node that should be used to build the widget on top of
@@ -104,24 +126,15 @@ define([
 		template: null,
 
 		/**
-		 * Called when the Custom Element is ready.
+		 * Called when the Custom Element is created.
 		 */
-		readyCallback: function () {
-			var self = this;
-			// Shadows the dom manipulation library for this widget
-			shadow(self, 'dom', dom(self.ownerDocument || document));
+		createdCallback: createdCallback,
 
-			// If there are any attributes to be mapped, map them
-			if (self.attributeMap) {
-				mapAttributes(self);
-			}
-
-			when(self.created ? self.created.call(self) : false).then(function () {
-				if (self.template) {
-					return self.template ? self.template.stamp(self) : false;
-				}
-			});
-		},
+		/**
+		 * The standard has changed from readyCallback to created callback, this is here until Polymer platform
+		 * is changed.
+		 */
+		readyCallback: createdCallback,
 
 		/**
 		 * Called during readyCallback.  This can be defined downstream to do any custom functionality to initialise

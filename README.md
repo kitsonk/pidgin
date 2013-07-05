@@ -31,12 +31,7 @@ like Dijit where it can, there are some fundamental concept shifts:
 
 * It directly supports reactive templating (based on `pidgin/tmpl` and MDV) directly in the base Widget.
 
-*Note* Because of the way the Custom Elements works, the existing Dijit lifecycle doesn't map very well, since a lot of
-the "grunt work" is done by the underlying technologies.  Currently there are only the four methods identified in the
-working specification for Custom Elements: `readyCallback`, `insertedCallback`, `removedCallback` and
-`attributeChangedCallback`.  This may change in the future.  Currently, _Widget provides a `readyCallback` and does some
-initialisation of the instance (mapping attributes and stamping out templates).  It will also call '.startup()' which is
-the current location to do additional initialisation activities, though the whole lifecycle is under development.
+For more information on `_Widget` see the [_Widget](docs/widget.md) documentation.
 
 ## pidgin/Button ##
 
