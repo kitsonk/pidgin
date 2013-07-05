@@ -78,6 +78,36 @@ define([
 	}
 
 	/**
+	 * Map events from the `item.events`
+	 * @param  {pidgin/_Widget} item The target widget that needs its events mapped
+	 */
+	function mapEvents(item) {
+		var events = item.events,
+			key, type, selector, value;
+		if (events) {
+			// Iterate through each event and attach it to the item
+			// The key should be in the format of "type" or "selector:type"
+			for (key in events) {
+				value = events[key];
+				key = key.split(':');
+				type = key.pop();
+				selector = key.join(':');
+				if (typeof value === 'string' && value in item) {
+					value = item[value];
+				}
+				item.on(selector ? {
+					type: type,
+					selector: selector,
+					listener: value
+				} : {
+					type: type,
+					listener: value
+				});
+			}
+		}
+	}
+
+	/**
 	 * Execute the "creation" lifecycle of the widget, where the DOM manipulation library is shadowed, attributes are
 	 * mapped from the widget to its properties, the `.created()` method is called and if present, the template is
 	 * stamped out.
@@ -96,6 +126,9 @@ define([
 			if (self.template) {
 				return self.template ? self.template.stamp(self) : false;
 			}
+		}).then(function () {
+			// Map the events to the current widget
+			mapEvents(self);
 		});
 	}
 
@@ -135,6 +168,8 @@ define([
 		 * is changed.
 		 */
 		readyCallback: createdCallback,
+
+		events: {},
 
 		/**
 		 * Called during readyCallback.  This can be defined downstream to do any custom functionality to initialise

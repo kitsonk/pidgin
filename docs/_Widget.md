@@ -33,7 +33,7 @@ You can also create an instance declaratively:
 There are currently three lifecycle methods which can be extended on the widget:
 
 * `.created()` - This occurs after instantiation, after initial attributes have been copied to properties, but before
-  any template has been stamped out.  This is called synchronously.
+  any template has been stamped out and events attached.  This is called synchronously.
 
 * `.inserted()` - Called asynchronously whenever the widget is inserted into the DOM.
 
@@ -88,8 +88,37 @@ and has an optional third:
 * `listener` - The listener function to be called when the event is detected.
 
 * `selector` - This optional property specifies the CSS selector that identifies a widget's sub node that the listener
-  should be attached to.  For example, if the widget container a child node that was a `<span>` tag, then the selector
-  of `'span'` would select that node.  If the property it omitted, the target will be the widget itself.
+  should be attached to.  For example, if the widget contains a child node that was a `<span>` tag, then the selector
+  of `'span'` would select that node.  If the property is omitted, the target will be the widget itself.
+
+Events can be auto-attached during the creation lifecycle.  There is a property of `.events`, which supplies a hash of
+events to listen for and their listeners.  The each property key identifies the event type (and optionally the
+selector).  The value of the property is the listener or the name of the listener in the class.  For example, if you
+wanted to log click events to the console, you would do something like:
+
+```js
+{
+	events: {
+		'click': function (e) {
+			console.log(e);
+		}
+	}
+}
+```
+
+If your widget had a sub-element of a button, which you wanted to listen to on a method named `_onClick` you would want
+to do something like:
+
+```js
+{
+	events: {
+		'button:click': '_onClick'
+	},
+	_onClick: function (e) {
+		console.log(e);
+	}
+}
+```
 
 Synthetic events can be emitted on the widget or its sub-nodes via the `.emit()` function.  The function takes a
 configuration object which specifies the details of the event to be emitted.  The configuration object requires two
@@ -99,10 +128,10 @@ properties and has an optional third:
 
 * `event` - The synthetic event object.
 
-* `selector` - This optional property specifies the CSS selector that identifies a widget's sub node that the listener
-  should be attached to.  For example, if the widget container a child node that was a `<span>` tag, then the selector
-  of `'span'` would select that node and the event would be emitted on that.  If the property is omitted, the target
-  will be the widget itself.
+* `selector` - This optional property specifies the CSS selector that identifies a sub-node of the current widget that
+  is the target of the event.  For example, if the widget contains a child node that was a `<span>` tag, then the
+  selector of `'span'` would target the event on that node.  If the property is omitted, the target will be the widget
+  itself.
 
 ## Hiding and Showing
 
