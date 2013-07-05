@@ -41,7 +41,7 @@ define([
 		/**
 		 * The definable method that occurs during the readyCallback
 		 */
-		startup: after(function () {
+		ready: after(function () {
 			if (!this.label) {
 				this.label = this.innerHTML;
 			}

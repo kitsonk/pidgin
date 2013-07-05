@@ -5,8 +5,9 @@ define([
 	'./lib/core/dom',
 	'./lib/core/lang',
 	'./lib/core/on',
-	'./lib/core/properties'
-], function (exports, aspect, compose, dom, lang, on, properties) {
+	'./lib/core/properties',
+	'./lib/core/when'
+], function (exports, aspect, compose, dom, lang, on, properties, when) {
 	'use strict';
 
 	/**
@@ -103,23 +104,20 @@ define([
 		 * Called when the Custom Element is ready.
 		 */
 		readyCallback: function () {
+			var self = this;
 			// Shadows the dom manipulation library for this widget
-			shadow(this, 'dom', dom(this.ownerDocument || document));
+			shadow(self, 'dom', dom(self.ownerDocument || document));
 
 			// If there are any attributes to be mapped, map them
-			if (this.attributeMap) {
-				mapAttributes(this);
+			if (self.attributeMap) {
+				mapAttributes(self);
 			}
 
-			// Call startup method if present
-			if (this.startup) {
-				this.startup.call(this);
-			}
-
-			// If there is a template, stamp it out.
-			if (this.template) {
-				this.template.stamp(this);
-			}
+			when(self.created ? self.created.call(self) : false).then(function () {
+				if (self.template) {
+					return self.template ? self.template.stamp(self) : false;
+				}
+			});
 		},
 
 		/**
@@ -127,7 +125,7 @@ define([
 		 * the instance.  It occurs between any attributes being mapped from the widget and before the template gets
 		 * stamped out.
 		 */
-		startup: function () {
+		created: function () {
 
 		},
 
@@ -135,6 +133,16 @@ define([
 		 * Called when inserted into the document flow
 		 */
 		insertedCallback: function () {
+			var self = this;
+
+			when(self.inserted ? self.inserted.call(self) : false);
+		},
+
+		/**
+		 * Called during insertedCallback.  This can be defined downstream to do any custom functionality when the
+		 * instance is inserted into the document flow.
+		 */
+		inserted: function () {
 
 		},
 
@@ -142,6 +150,16 @@ define([
 		 * Called when removed from the document flow
 		 */
 		removedCallback: function () {
+			var self = this;
+
+			when(self.removed ? self.removed.call(self) : false);
+		},
+
+		/**
+		 * Called during removedCallback.  This can be defined downstream to do any custom functionality when the 
+		 * instance is inserted into the document flow.
+		 */
+		removed: function () {
 
 		},
 
@@ -149,6 +167,16 @@ define([
 		 * Called when an attribute is changed
 		 */
 		attributeChangedCallback: function (/*attributeName*/) {
+			var self = this;
+
+			when(self.attributeChanged ? self.attributeChanged.apply(self, arguments) : false);
+		},
+
+		/**
+		 * Called during attributeChangedCallback.  This can be defined downstream to do any custom functionality when
+		 * an attribute has changed on the instance.
+		 */
+		attributeChanged: function (/*attributeName*/) {
 
 		},
 
@@ -163,25 +191,26 @@ define([
 		},
 
 		/**
-		 * Assign a listener to events on the widget.
-		 * @param  {String}   type     The event type to listen for
-		 * @param  {Function} listener The function to invoke when an event is received
-		 * @return {Object}			   A handle object that contains a `.remove()` method to remove the listener
+		 * Add a listener for a target
+		 * @param  {Object} config A hash that contains the configuration for the listener.  It should contain at least
+		 *                         a `type` and `listener` properties.  If it contains a `selector` property, then that
+		 *                         will be used to select the node what the listener is on.
+		 * @return {Object}        A handle that contains a `remove()` function to remove the listener.
 		 */
-		on: function (type, listener) {
-			return this.own(on.parse(this, type, listener, function (target, type) {
-				return aspect.after(target, 'on' + type, listener, true);
+		on: function (config) {
+			var node = (config.selector && this.querySelector(config.selector)) || this;
+			return this.own(on.parse(node, config.type, config.listener, function (target, type) {
+				return aspect.after(target, 'on' + type, config.listener, true);
 			}));
 		},
 
 		/**
-		 * Emit a synthetic event on the widget
-		 * @return {Boolean} If the event is cancelable and the event is not cancelled, emit will return true. If the
-		 *                   event is cancelable and the event is cancelled, emit will return false.
+		 * Emits a synthetic event on a target
+		 * @param  {[type]} config [description]
+		 * @return {[type]}        [description]
 		 */
-		emit: function (/*type, event*/) {
-			var args = [ this ];
-			args.push.apply(args, arguments);
+		emit: function (config) {
+			var args = [ (config.selector && this.querySelector(config.selector)) || this, config.type, config.event ];
 			return on.emit.apply(on, args);
 		},
 

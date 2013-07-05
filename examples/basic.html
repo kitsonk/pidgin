@@ -64,10 +64,13 @@
 		var button1 = dom.get('button1');
 
 		/* One of the things that is added via _Widget is '.on()' */
-		button1.on('click', function () {
-			/* Just reordering things... */
-			list1.items.push(list1.items.shift());
-			Platform.performMicrotaskCheckpoint();
+		button1.on({
+			type: 'click',
+			listener: function () {
+				/* Just reordering things... */
+				list1.items.push(list1.items.shift());
+				Platform.performMicrotaskCheckpoint();
+			}
 		});
 
 		/* needed for browsers without Object.observe() */

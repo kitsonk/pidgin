@@ -121,6 +121,11 @@ define([
 		 * @return {String}	       The string name of the class
 		 */
 		function getBaseName(base) {
+			// If the base is already a widget, it will have a _baseName in the prototype and that should be returned
+			// instead.
+			if (base && base.prototype && base.prototype._baseName) {
+				return base.prototype._baseName;
+			}
 			// Try to use Function.name if available
 			if (base && base.name) {
 				return base.name;
@@ -176,7 +181,7 @@ define([
 			throw new TypeError('Cannot determine class of baseElement');
 		}
 		// Check to see if baseElement is a valid HTMLElement or we can identify the tag it is extending
-		if ((baseElement !== HTMLElement) && !(baseName in tags)) {
+		if ((baseName !== 'HTMLElement') && !(baseName in tags)) {
 			throw new TypeError('baseElement of class "' + baseName + '" is not a recognised descendent of HTMLElement');
 		}
 
@@ -188,6 +193,9 @@ define([
 
 		// "Hide" the original constructor
 		shadow(ctor.prototype, 'ctor', ctor);
+
+		// "Hide" the current baseName
+		shadow(ctor.prototype, 'baseName', baseName);
 
 		// Assign the proper constructor to the registry and return its value
 		/* jshint boss:true */
