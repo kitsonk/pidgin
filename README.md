@@ -31,7 +31,7 @@ like Dijit where it can, there are some fundamental concept shifts:
 
 * It directly supports reactive templating (based on `pidgin/tmpl` and MDV) directly in the base Widget.
 
-For more information on `_Widget` see the [_Widget](docs/widget.md) documentation.
+For more information on `_Widget` see the [_Widget](docs/_Widget.md) documentation.
 
 ## pidgin/Button ##
 
