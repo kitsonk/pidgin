@@ -108,27 +108,18 @@ define([
 	}
 
 	/**
-	 * Execute the "creation" lifecycle of the widget, where the DOM manipulation library is shadowed, attributes are
-	 * mapped from the widget to its properties, the `.created()` method is called and if present, the template is
-	 * stamped out.
+	 * Execute the "creation" lifecycle of the widget, where the DOM manipulation library is shadowed, the `.created()`
+	 * method is called and if present, the template is stamped out.
 	 */
 	function createdCallback() {
 		var self = this;
 		// Shadows the dom manipulation library for this widget
 		shadow(self, 'dom', dom(self.ownerDocument || document));
 
-		// If there are any attributes to be mapped, map them
-		if (self.attributeMap) {
-			mapAttributes(self);
-		}
-
 		when(self.created ? self.created.call(self) : false).then(function () {
 			if (self.template) {
 				return self.template ? self.template.stamp(self) : false;
 			}
-		}).then(function () {
-			// Map the events to the current widget
-			mapEvents(self);
 		});
 	}
 
@@ -186,7 +177,16 @@ define([
 		insertedCallback: function () {
 			var self = this;
 
-			when(self.inserted ? self.inserted.call(self) : false);
+			// If there are any attributes to be mapped, map them
+			// (This is moved to insertedCallback because MDV doesn't set the bound attributes until sometime
+			// between creation and insertion)
+			if (self.attributeMap) {
+				mapAttributes(self);
+			}
+
+			when(self.inserted ? self.inserted.call(self) : false).then(function () {
+				mapEvents(self);
+			});
 		},
 
 		/**
@@ -242,6 +242,14 @@ define([
 		},
 
 		/**
+		 * Query the sub-DOM of the widget based on the supplied selectors
+		 * @return {Array} The selected nodes, if any
+		 */
+		query: function (/*selectors...*/) {
+			return this._dom.query.apply(this, [ this ].concat(Array.prototype.slice.call(arguments)));
+		},
+
+		/**
 		 * Hide the widget
 		 */
 		hide: function () {
@@ -275,9 +283,19 @@ define([
 		 * @return {Object}        A handle that contains a `remove()` function to remove the listener.
 		 */
 		on: function (config) {
-			var node = (config.selector && this.querySelector(config.selector)) || this;
-			return this.own(on.parse(node, config.type, config.listener, function (target, type) {
-				return aspect.after(target, 'on' + type, config.listener, true);
+			var self = this,
+				node;
+
+			if (config.selector) {
+				node = this.querySelector(config.selector);
+				if (!node) {
+					console.warn(this.toString() + ' - on() - Did not select any node based on selector: "' +
+						config.selector + '"');
+				}
+			}
+
+			return this.own(on.parse(node || this, config.type, config.listener, function (target, type) {
+				return aspect.after(target, 'on' + type, lang.bind(self, config.listener), true);
 			}));
 		},
 
@@ -322,7 +340,7 @@ define([
 		 * @return {String} The string that represents the Widget
 		 */
 		toString: function () {
-			return '[Widget ' + this.declaredClass + ', ' + (this.id || 'NO ID') + ']';
+			return '[pidgin/Widget, ' + (this.id || 'NO ID') + ']';
 		}
 	});
 

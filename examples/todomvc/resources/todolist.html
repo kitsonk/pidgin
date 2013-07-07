@@ -1,10 +1,10 @@
-<input id="toggle-all" type="checkbox">
+<input id="toggle-all" type="checkbox" checked="{{ allComplete }}">
 <label for="toggle-all">Mark all as complete</label>
 <ul id="todo-list">
 	<template repeat="{{ list }}">
-		<li class="{{ status }}">
+		<li is="pd-todo-item" index="{{ index }}" class="{{ status }}">
 			<div class="view">
-				<input class="toggle" type="checkbox" checked>
+				<input class="toggle" type="checkbox" checked="{{ status }}">
 				<label>{{ text }}</label>
 				<button class="destroy"></button>
 			</div>

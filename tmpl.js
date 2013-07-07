@@ -4,10 +4,11 @@ define([
 	'./widgets',
 	'./lib/core/has!host-browser?./lib/core/request',
 	'./lib/core/has!host-node?./lib/core/node!fs',
+	'./lib/core/aspect',
 	'./lib/core/compose',
 	'./lib/core/has',
 	'./lib/core/doc'
-], function (exports, require, widgets, request, fs, compose, has, doc) {
+], function (exports, require, widgets, request, fs, aspect, compose, has, doc) {
 	'use strict';
 
 	/* global HTMLTemplateElement */
@@ -59,19 +60,34 @@ define([
 		 */
 		node: null,
 
+		bindingDelegate: property({
+			get: function () {
+				return this.node && this.node.bindingDelegate;
+			},
+			set: function (value) {
+				if (this.node) {
+					this.node.bindingDelegate = value;
+				}
+			}
+		}),
+
 		/**
 		 * "Stamp out" a MDV template
-		 * @param  {Object}  model         The model to set on the instance of this MDV template
-		 * @param  {DOMNode} referenceNode The node to use as reference for appending the template
-		 * @return {DOMNode}               The MDV template DOM node
+		 * @param  {Object}   model             The model to set on the instance of this MDV template
+		 * @param  {DOMNode}  [referenceNode]   The node to use as reference for appending the template
+		 * @param  {Object}   [bindingDelegate] A binding delegate to use with this instance of the template
+		 * @return {DOMNode}                    The MDV template DOM node
 		 */
-		stamp: function (model, referenceNode) {
+		stamp: function (model, referenceNode, bindingDelegate) {
 			referenceNode = referenceNode || model;
 			var instance = doc.createElement('template');
 			instance.setAttribute('ref', this.id);
 			instance.setAttribute('bind', '{{}}');
 			if (referenceNode) {
 				referenceNode.appendChild(instance);
+			}
+			if (bindingDelegate || this.node.bindingDelegate) {
+				instance.bindingDelegate = bindingDelegate || this.node.bindingDelegate;
 			}
 			decorateTemplates(instance);
 			instance.model = model;

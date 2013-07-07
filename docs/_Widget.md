@@ -91,7 +91,11 @@ and has an optional third:
   should be attached to.  For example, if the widget contains a child node that was a `<span>` tag, then the selector
   of `'span'` would select that node.  If the property is omitted, the target will be the widget itself.
 
-Events can be auto-attached during the creation lifecycle.  There is a property of `.events`, which supplies a hash of
+Listeners, even those attached with a selector, will be scoped so that `this` refers to the widget instance when called.
+If you need to know specifically the target of the event, the listener should introspect the event object passed as an
+argument to the listener.
+
+Events can be auto-attached during the insertion lifecycle.  There is a property of `.events`, which supplies a hash of
 events to listen for and their listeners.  The each property key identifies the event type (and optionally the
 selector).  The value of the property is the listener or the name of the listener in the class.  For example, if you
 wanted to log click events to the console, you would do something like:
