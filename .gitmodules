@@ -1,9 +1,6 @@
-[submodule "lib/platform"]
-	path = lib/platform
-	url = https://github.com/Polymer/platform.git
-[submodule "lib/dcl"]
-	path = lib/dcl
-	url = https://github.com/uhop/dcl.git
 [submodule "lib/core"]
 	path = lib/core
 	url = https://github.com/kitsonk/core.git
+[submodule "lib/CustomElements"]
+	path = lib/CustomElements
+	url = https://github.com/Polymer/CustomElements.git
